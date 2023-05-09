@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" /> -->
+    <!-- <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" /> -->
+    <title>Hello from Electron renderer!</title>
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/jsx">
+        const app = document.getElementById("app")
+
+        function Counter({val}) {
+            console.log("Counter called")
+
+            const [state, setState] = React.useState(val);
+
+            React.useEffect(() => {
+            	if (val !== state) window.api.send("saveStateRequest", state);
+            }, [state])
+
+            const subOne = () => {
+                setState(state-1)
+            };
+
+            const addOne = () => {
+                setState(state+1)
+            };
+
+            return (
+                <>
+                    <div>
+                        <span>counter: {state}</span>
+                    </div>
+                    <div>
+                        <button onClick={addOne}>+1</button>
+                        <button onClick={subOne}>-1</button>
+                    </div>
+                </>
+            )
+        }
+
+        window.api.receive("getStateResponse", (val) => {
+            console.log("getStateResponse", val)
+            ReactDOM.render(<Counter val={val} />, app)
+        })
+        window.api.send("getStateRequest")
+    </script>
+</body>
+
+</html>
